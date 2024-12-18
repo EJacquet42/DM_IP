@@ -1,35 +1,17 @@
 <?php
-require_once 'connDb.php';
-require_once 'getIp.php';
 
-    /**
-     * @param string $ip Adresse IP à vérifier
-     * @return array|null Les données associées ou null si aucune correspondance
-     */
-function isIpInRange($ip) {
-    global $db;
-
-    $ipLong = ipToInt($ip);
-
-    $stmt = $db->prepare('SELECT country_code FROM ip2location WHERE ip_from <= :ip AND ip_to >= :ip');
-    $stmt->bindParam(':ip', $ipLong, PDO::PARAM_STR);
-    $stmt->execute();
-
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+require_once 'functions.php';
+require_once 'get_ip.php';
 
 $ip = getIpAddress();
-$ipInfo = isIpInRange($ip);
 
- // Vérifie si l'IP est dans la plage et redirige
- if ($ipInfo['country_code'] === 'FR' ) {
-     require_once('./home.php');
+if (ipFrance($ip)) {
+    echo "L'adresse IP $ip est en France.";
+    include './home.php';
+} else {
+    echo "L'adresse IP $ip n'est pas en France.";
+    include './oups.php';
+}
 
- } else if ($ipInfo['country_code'] === '-') {
-     require_once('./leVide.php');
+?>
 
- } else {
-     require_once('./oups.php');
- }
-
- ?>
